@@ -17,6 +17,7 @@
 
 import {
   copyFileSync,
+  existsSync,
   mkdirSync,
   readFileSync,
   statSync,
@@ -31,6 +32,14 @@ const target = join(outDir, "entry.png");
 
 const MAX_BYTES = 1_048_576; // the bounty's 1 MiB cap
 const PNG_MAGIC = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+
+// Fail loudly rather than emit nothing if the page is absent:
+// a missing entry.png means the repository snapshot is broken,
+// and a clear error here is easier to diagnose than a failed
+// copy from a path that does not exist.
+if (!existsSync(source)) {
+  throw new Error("entry.png is missing from the repository");
+}
 
 mkdirSync(outDir, { recursive: true });
 copyFileSync(source, target);

@@ -44,6 +44,14 @@ if (bytes !== statSync(source).size) {
 }
 
 const data = readFileSync(target);
+
+// Equal size alone is not proof of an intact copy (a damaged
+// file can keep its length), so compare the bytes themselves:
+// the graded run must emit exactly the reviewed page.
+if (!data.equals(readFileSync(source))) {
+  throw new Error("copy incomplete: output bytes differ from source");
+}
+
 const head = data.subarray(0, PNG_MAGIC.length);
 for (let i = 0; i < PNG_MAGIC.length; i++) {
   if (head[i] !== PNG_MAGIC[i]) {
